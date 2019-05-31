@@ -1,45 +1,70 @@
+#include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
-#include <time.h>
+#include "hello_world.h"
 
-#include "stop.h"
+#define len(_arr) ((int)((&_arr)[1] - _arr))
+
+static const char * const programs[] = { "/semaphore_test" };
+
+void panic(const char *msg)
+{
+	fprintf(stderr, "%s: %s (errno = %d)\n", msg, strerror(errno), errno);
+	exit(-1);
+}
+
+void mount_fs()
+{
+	printf("Mounting filesystems\n");
+	// If /sys is not created, make it read-only (mode = 444)
+	if (mkdir("/sys", 0x124) && errno != EEXIST)
+		panic("mkdir");
+	if (mount("none", "/sys", "sysfs", 0, ""))
+		panic("mount");
+}
 
 int main()
 {
-	pid_t pid_A = fork();
-	if (pid_A == -1) {
-		perror("fork");
-		return -1;
-	} else if (pid_A) {
-		pid_t pid_int = fork();
-		if (pid_int == -1) {
-			perror("fork");
-			return -1;
-		} else if (pid_int) {
-			for (;;) {
-				char c = getchar();
-				if (c == 'b') {
-					if (stop_process(pid_A))
-						return -1;
-				} else if (c == 'a') {
-					if (stop_process(pid_int))
-						return -1;
-				} else if (c == 'd') {
-					continue_process();
-				}
-			}
+	printf("Custom initramfs - Hello World syscall:\n");
+	hello_world();
+	mount_fs();
+
+	printf("Forking to run %d programs\n", len(programs));
+
+	for (int i = 0; i < len(programs); i++) {
+		const char *path = programs[i];
+		pid_t pid = fork();
+		if (pid == -1) {
+			panic("fork");
+		} else if (pid) {
+			printf("Starting %s (pid = %d)\n", path, pid);
 		} else {
-			for (int i = 0;;i++) {
-				const struct timespec ts = {.tv_sec = 0, .tv_nsec = 5e8 };
-				nanosleep(&ts, NULL);
-				printf("%d\n", i);
-			}
-		}
-	} else {
-		for (;;) {
-			const struct timespec ts = {.tv_sec = 0, .tv_nsec = 5e8 };
-			nanosleep(&ts, NULL);
-			printf("A\n");
+			execl(path, path, (char *)NULL);
+			panic("execl");
 		}
 	}
+
+	int program_count = len(programs);
+	while (program_count) {
+		int wstatus;
+		pid_t pid = wait(&wstatus);
+		if (WIFEXITED(wstatus))
+			printf("pid %d exited with %d\n", pid, WEXITSTATUS(wstatus));
+		else if (WIFSIGNALED(wstatus))
+			printf("pid %d killed by signal %d\n", pid, WTERMSIG(wstatus));
+		else
+			continue;
+		program_count--;
+	}
+
+	printf("init finished\n");
+	for (;;)
+		sleep(1000);
+	return 0;
 }
