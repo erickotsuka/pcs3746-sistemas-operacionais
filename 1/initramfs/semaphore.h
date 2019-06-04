@@ -6,7 +6,7 @@
 #define __NR_init_semaphore	404
 #define __NR_up	405
 #define __NR_down 406
-
+#define __NR_sem_debug 407
 
 long init_semaphore(int initial_counter)
 {
@@ -21,4 +21,12 @@ long up(int sem_id)
 long down(int sem_id)
 {
 	return syscall(__NR_down, sem_id);
+}
+
+/**
+ * Remove this function when task is complete
+ */
+long sem_debug(void)
+{
+	return syscall(__NR_sem_debug);
 }

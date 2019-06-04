@@ -18,6 +18,7 @@ int main(void)
        {
            printf("A\n");
            down(semaphore_id);
+        //    sem_debug();
            sleep(1);
        }
     }
@@ -27,6 +28,7 @@ int main(void)
         {
             printf("B\n");
             up(semaphore_id);
+            // sem_debug();
             sleep(4);
         }
     }
