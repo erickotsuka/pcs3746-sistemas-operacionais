@@ -22,11 +22,3 @@ long down(int sem_id)
 {
 	return syscall(__NR_down, sem_id);
 }
-
-/**
- * Remove this function when task is complete
- */
-long sem_debug(void)
-{
-	return syscall(__NR_sem_debug);
-}
