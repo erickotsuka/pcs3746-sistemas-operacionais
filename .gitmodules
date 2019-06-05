@@ -1,6 +1,7 @@
 [submodule "linux"]
 	path = linux
 	url = https://github.com/erickotsuka/linux.git
+	branch = master
 [submodule "3/initramfs/busybox"]
 	path = 3/initramfs/busybox/busybox
 	url = git://busybox.net/busybox.git
