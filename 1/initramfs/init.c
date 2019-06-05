@@ -9,9 +9,11 @@
 #include <unistd.h>
 #include "hello_world.h"
 
+#include "stack.h"
+
 #define len(_arr) ((int)((&_arr)[1] - _arr))
 
-static const char * const programs[] = { "/semaphore_test" };
+static const char * const programs[] = { "/stack_push", "/stack_pop" };
 
 void panic(const char *msg)
 {

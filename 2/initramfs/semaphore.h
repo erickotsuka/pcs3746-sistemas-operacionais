@@ -6,7 +6,7 @@
 #define __NR_init_semaphore	404
 #define __NR_up	405
 #define __NR_down 406
-
+#define __NR_sem_debug 407
 
 long init_semaphore(int initial_counter)
 {
