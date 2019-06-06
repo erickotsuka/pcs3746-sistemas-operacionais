@@ -27,13 +27,17 @@ int main(void)
         /* Producer code */
         for (;;)
         {
+            printf("producer: Begin\n");
             sleep(PRODUCING_TIME_S);
-            printf("producer: Produced item\n");
+            printf("\nproducer: Produced item\n");
             down(empty);
             down(mutex);
+            printf("\nproducer: Start critical region\n");
             printf("producer: Inserted item in buffer\n");
+            printf("producer: End critical region\n");
             up(mutex);
             up(full);
+            printf("producer: End\n");
         }
     }
     else
@@ -41,13 +45,17 @@ int main(void)
         /* Consumer code */
         for (;;)
         {
+            printf("consumer: Begin\n");
             down(full);
             down(mutex);
+            printf("\nconsumer: Start critical region\n");
             printf("consumer: Removed item from buffer\n");
+            printf("consumer: End critical region\n");
             up(mutex);
             up(empty);
             sleep(CONSUMING_TIME_S);
             printf("consumer: Consumed item\n");
+            printf("consumer: End\n");
         }
     }
 
